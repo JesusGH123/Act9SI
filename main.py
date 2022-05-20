@@ -2,10 +2,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import random
 
+#Calculate distance between two points (linear)
+#Inputs: x1 and x2 (two points)
+#Output: linear distance
 def getDistance(x1, x2):
   return abs(x2-x1)
-  
+
+#Check which centroid is the nearest
+#Inputs: A point to compare
+#Output: The nearest centroid index and distance to the centroid
 def findCentroid(x2):
   distancesToCentroids = []
   for x1 in centroidsPos:
@@ -14,6 +21,9 @@ def findCentroid(x2):
 
   return distancesToCentroids.index(min_value), min_value
 
+#Calculate the matrixD
+#Input: None
+#Output: MatrixD (Matrix of distances)
 def getMatrixD():
   matrixD = [[], [], [], []]
   for aData in data:
@@ -23,7 +33,10 @@ def getMatrixD():
       matrixD[i].append(round(getDistance(centroidsPos[i-1], aData), 2))
   
   return matrixD
-  
+
+#Calculate the matrixG
+#Input: None
+#Output: MatrixG (Matrix of groups)
 def getMatrixG():
   matrixG = [[], [], [], []]
   for aData in data:
@@ -45,14 +58,14 @@ def getMatrixG():
 #Driver code
 completeData = pd.read_excel('peliculas.xlsx') #Read xlsx
 data = []
-category = "Likes"
-maxVal = max(completeData[category].tolist()) #Max element
+category = "Views"
+maxVal = max(completeData[category].tolist()) #Max element in the selected category
 
-#Extract the necessary columns and added to an array
+#Extract the necessary columns and added to the data array
 for i in range(0, len(completeData)):
   data.append((completeData["Movie"].iloc[i], completeData[category].iloc[i]))
 
-centroidsPos = [5000, 20000, 35000]  #Centroids initial position
+centroidsPos = [0, maxVal/2, maxVal]  #Centroids initial position
 limit = int(input("Cuantas iteraciones quieres hacer?: "))
 for i in range(0, limit):
   centroids = [[], [], []]
@@ -63,7 +76,7 @@ for i in range(0, limit):
     centroid, distToCentroid = findCentroid(data[i][1])
     centroids[centroid].append(data[i])  #Append data to the corresponding centroid
   
-  #Print data in each iteration
+  #Print all data in each iteration
   print("The centroids are in: ", centroidsPos)
   print("MatrixD: ")
   for i in range(0, len(matrixD)):
@@ -83,14 +96,15 @@ for i in range(0, limit):
     for j in range(0, len(centroids[i])):
       sum += centroids[i][j][1]
     if(len(centroids[i]) > 0):
-      centroidsPos[i] = sum/len(centroids[i])  #Average of the centroid
+      centroidsPos[i] = sum/len(centroids[i])  #Average of the centroid points
 
+#Print the final clasification
 for i in range(1, 4):
   if(i > 0): print("Centroid ", i)
   for j in range(0, len(centroids[i-1])):
     print('\t- Movie: "', centroids[i-1][j][0], f'" {category}:', centroids[i-1][j][1], sep="")
 
-#Graphics
+#Graph
 matrixD = matrixD.pop(0)  #Delete the title column
 plt.plot([i for i in range(0, len(data))], np.array(matrixD).flatten(), 'ro')
 plt.axis([1, len(data), 0, maxVal + 1])
