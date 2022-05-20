@@ -1,4 +1,7 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import sys
 
 def getDistance(x1, x2):
   return abs(x2-x1)
@@ -27,7 +30,7 @@ def getMatrixG():
     matrixG[0].append(aData[1])
 
   for j in range(0, len(matrixD[0])):
-    minElem = 1000
+    minElem = sys.maxsize
     for i in range(1, len(matrixG)):
       if(matrixD[i][j] < minElem):
         minElem = matrixD[i][j]
@@ -42,13 +45,14 @@ def getMatrixG():
 #Driver code
 completeData = pd.read_excel('peliculas.xlsx') #Read xlsx
 data = []
+category = "Likes"
+maxVal = max(completeData[category].tolist()) #Max element
 
 #Extract the necessary columns and added to an array
 for i in range(0, len(completeData)):
-  data.append((completeData["Movie"].iloc[i], completeData["Genre"].iloc[i]))
+  data.append((completeData["Movie"].iloc[i], completeData[category].iloc[i]))
 
-centroidsPos = [1,2,3]
-
+centroidsPos = [5000, 20000, 35000]  #Centroids initial position
 limit = int(input("Cuantas iteraciones quieres hacer?: "))
 for i in range(0, limit):
   centroids = [[], [], []]
@@ -84,4 +88,12 @@ for i in range(0, limit):
 for i in range(1, 4):
   if(i > 0): print("Centroid ", i)
   for j in range(0, len(centroids[i-1])):
-    print('\t- Movie: "', centroids[i-1][j][0], '" Genre:', centroids[i-1][j][1], sep="")
+    print('\t- Movie: "', centroids[i-1][j][0], f'" {category}:', centroids[i-1][j][1], sep="")
+
+#Graphics
+matrixD = matrixD.pop(0)  #Delete the title column
+plt.plot([i for i in range(0, len(data))], np.array(matrixD).flatten(), 'ro')
+plt.axis([1, len(data), 0, maxVal + 1])
+plt.xlabel('Movies')
+plt.ylabel(f'{category}')
+plt.show()
